@@ -1,0 +1,6 @@
+name: NCR Email Module
+description: This module provides all the email customizations for https://www.ncr-nmra.org.
+package: Custom
+
+type: module
+core: 8.x

@@ -1,0 +1,36 @@
+<?php
+
+/**
+ * @file
+ * Contains main module logic.
+ */
+
+use Drupal\Core\Field\BaseFieldDefinition;
+
+/**
+ * Implements hook_mail_alter().
+ */
+function ncr_email_mail_alter(&$message) {
+  // only alter contact forms
+  if (!empty($message['id']) && $message['id'] == 'contact_page_mail') {
+    // then only if the contact form is "contact_us"
+    if ($message['params']['contact_form']->id() == 'contact_us') {
+      $contact_message = $message['params']['contact_message'];
+      // Send the message to the selected recipient (not the form contact)
+      $message['to'] = $message['headers']['To'] = $contact_message->get('field_recipient')->value;
+      // Prefix the subject with "[NCR - "
+      $message['subject'] = str_replace('[Contact Us]','[NCR - Contact Us]',$message['subject']);
+      // Reset the message body so we can reformat it completely.
+      $message['body'] = [];
+      // New Message Body
+      $new_body = 'The following message was submitted via the Contact Us page on the NCR Website:' . PHP_EOL . PHP_EOL;
+      $new_body .= 'Name: ' . $contact_message->get('name')->value . PHP_EOL;
+      $new_body .= 'Email: ' . $contact_message->get('mail')->value . PHP_EOL;
+      $new_body .= 'Subject: ' . $contact_message->get('subject')->value . PHP_EOL . PHP_EOL;
+      $new_body .= $contact_message->get('message')->value . PHP_EOL . PHP_EOL;
+      $message['body'][] = $new_body;
+    }
+  }
+}
+
+?>
